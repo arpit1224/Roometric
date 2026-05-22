@@ -1,7 +1,9 @@
-import { ArrowRight, ArrowUpRight, Clock, Layers } from "lucide-react";
+import Upload from "../../components/Upload";
+import { ArrowRight, ArrowUpRight, Clock, Layers, Upload as UploadIcon } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import type { Route } from "./+types/home";
 import Button from "../../components/ui/Button";
+import { useNavigate } from "react-router";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -11,6 +13,16 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  const handleUploadComplete = async (base64Image: string) => {
+    const newId = Date.now().toString();
+
+    navigate(`/visualizer/${newId}`);
+
+    return true;
+  }
+
   return (
     <div className="home">
       <Navbar />
@@ -21,7 +33,7 @@ export default function Home() {
             <div className="pulse"></div>
           </div>
 
-          <p>Introducing Roometric 2.0</p>
+          <p>Introducing Roometric 1.0</p>
         </div>
 
         <h1>Build beautiful spaces at the speed of thought with Roometric</h1>
@@ -48,10 +60,11 @@ export default function Home() {
                 <Layers className="icon" />
               </div>
               <h3>Upload your floor plan</h3>
-              <p>Supports JPG, PNG, PDF, formats upto 10MB</p>
+              <p>Supports JPG, PNG, formats upto 10MB</p>
             </div>
 
-            <p>Upload images</p>
+            <Upload onComplete={handleUploadComplete}/>
+
           </div>
         </div>
       </section>
