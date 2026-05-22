@@ -15,12 +15,12 @@ export function meta({ }: Route.MetaArgs) {
 export default function Home() {
   const navigate = useNavigate();
 
-  const handleUploadComplete = async (base64Image: string) => {
+  const handleUploadComplete = (base64Image: string) => {
     const newId = Date.now().toString();
+    const storageKey = `roometric-upload-${newId}`;
 
+    sessionStorage.setItem(storageKey, base64Image);
     navigate(`/visualizer/${newId}`);
-
-    return true;
   }
 
   return (
