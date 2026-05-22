@@ -4,6 +4,8 @@ import Navbar from "../../components/Navbar";
 import type { Route } from "./+types/home";
 import Button from "../../components/ui/Button";
 import { useNavigate } from "react-router";
+import { useState } from "react";
+import { createProject } from "../../components/lib/puter.action";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -14,13 +16,36 @@ export function meta({ }: Route.MetaArgs) {
 
 export default function Home() {
   const navigate = useNavigate();
+  const [projects, setProjects] = useState<DesignItem[]>([]);
 
-  const handleUploadComplete = (base64Image: string) => {
+  const handleUploadComplete = async (base64Image: string) => {
     const newId = Date.now().toString();
-    const storageKey = `roometric-upload-${newId}`;
+    const name = `Residence ${newId}`;
 
-    sessionStorage.setItem(storageKey, base64Image);
-    navigate(`/visualizer/${newId}`);
+    const newItem = {
+      id: newId, name, sourceImage: base64Image,
+      renderedImage: undefined,
+      timestamp: Date.now()
+    }
+
+    const saved = await createProject({ item: newItem, visibility: 'private' });
+
+    if (!saved) {
+      console.error("Failed to create project");
+      return false;
+    }
+
+    setProjects((prev) => [saved, ...prev]);
+
+    navigate(`/visualizer/${newId}`, {
+      state: {
+        initialImage: saved.sourceImage,
+        initialRender: saved.renderedImage || null,
+        name
+      }
+    });
+
+    return true;
   }
 
   return (
@@ -63,7 +88,7 @@ export default function Home() {
               <p>Supports JPG, PNG, formats upto 10MB</p>
             </div>
 
-            <Upload onComplete={handleUploadComplete}/>
+            <Upload onComplete={handleUploadComplete} />
 
           </div>
         </div>
@@ -79,10 +104,11 @@ export default function Home() {
           </div>
 
           <div className="projects-grid">
+            {projects.map(({ id, name, renderedImage, sourceImage, timestamp }) => (
             <div className="project-card group">
               <div className="preview">
-                <img 
-                 src="https://roomify-mlhuk267-dfwu1i.puter.site/projects/1770803585402/rendered.png" alt="Project"
+                <img
+                  src={renderedImage || sourceImage} alt="Project"
                 />
 
                 <div className="badge">
@@ -92,13 +118,13 @@ export default function Home() {
 
               <div className="card-body">
                 <div>
-                  <h3>Project Suave</h3>
+                  <h3>{name}</h3>
 
                   <div className="meta">
                     <Clock size={12} />
-                    <span>{new Date('december 24 2025').toLocaleDateString()
-                      }</span>
-                      <span>By Suave Architect</span>
+                    <span>{new Date(timestamp).toLocaleDateString()
+                    }</span>
+                    <span>By Suave Architect</span>
                   </div>
                 </div>
                 <div className="arrow">
@@ -106,9 +132,12 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            ))}
+
           </div>
         </div>
       </section>
     </div>
   )
 }
+
