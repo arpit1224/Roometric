@@ -2,7 +2,16 @@ export const HOSTING_CONFIG_KEY = "roometric_hosting_config";
 export const HOSTING_DOMAIN_SUFFIX = ".puter.site";
 
 export const isHostedUrl = (value: unknown): value is string =>
-    typeof value === "string" && value.includes(HOSTING_DOMAIN_SUFFIX);
+    (() => {
+    if (typeof value !== "string") return false;
+    try {
+        const { hostname } = new URL(value);
+        const suffix = HOSTING_DOMAIN_SUFFIX.slice(1); // "puter.site"
+        return hostname === suffix || hostname.endsWith(HOSTING_DOMAIN_SUFFIX);
+    } catch {
+        return false;
+    }
+})();
 
 export const createHostingSlug = () =>
     `roometric-${Date.now().toString(36)}-${Math.random()

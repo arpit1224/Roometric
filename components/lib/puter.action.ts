@@ -2,6 +2,8 @@ import puter from "@heyputer/puter.js";
 import { getOrCreateHostingConfig, uploadImageToHosting } from "./puter.hosting";
 import { isHostedUrl } from "./utils";
 
+const projectKey = (projectId: string) => `roometric_project:${projectId}`;
+
 export const signIn = async () => await puter.auth.signIn();
 
 export const signOut = async () => puter.auth.signOut();
@@ -51,9 +53,22 @@ export const createProject = async ({ item }: CreateProjectParams): Promise<Desi
     }
 
     try {
+        await puter.kv.set(projectKey(projectId), payload);
         return payload;
     } catch (e) {
         console.log('Failed to save project', e)
+        return null;
+    }
+}
+
+export const fetchProjectById = async (projectId: string): Promise<DesignItem | null> => {
+    if (!projectId) return null;
+
+    try {
+        const project = await puter.kv.get<DesignItem>(projectKey(projectId));
+        return project?.id && project.sourceImage ? project : null;
+    } catch (e) {
+        console.log('Failed to fetch project', e);
         return null;
     }
 }
