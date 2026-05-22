@@ -32,9 +32,11 @@ export const uploadImageToHosting = async ({ hosting, url, projectId, label }: S
 
         const contentType = resolved.contentType || resolved.blob.type || '';
         const ext = getImageExtension(contentType, url);
+        if (!/^[a-zA-Z0-9_-]+$/.test(projectId)) {
+            throw new Error("Invalid projectId");
+        }
         const dir = `projects/${projectId}`;
         const filePath = `${dir}/${label}.${ext}`;
-
         const uploadFile = new File([resolved.blob], `${label}.${ext}`, {
             type: contentType,
         });

@@ -29,8 +29,7 @@ export const createProject = async ({ item }: CreateProjectParams): Promise<Desi
             hosting, url: item.renderedImage, projectId, label: 'rendered',
         }) : null;
 
-    const resolvedSource = hostedSource?.url || (isHostedUrl(item.sourceImage)
-        ? item.sourceImage : '');
+    const resolvedSource = hostedSource?.url || item.sourceImage;
 
     if (!resolvedSource) {
         console.warn('Failed to host source image, skipping save.')
