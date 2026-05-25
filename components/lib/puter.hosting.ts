@@ -1,7 +1,8 @@
-import puter from "@heyputer/puter.js";
 import { createHostingSlug, fetchBlobFromUrl, getHostedUrl, getImageExtension, HOSTING_CONFIG_KEY, imageUrlToPngBlob, isHostedUrl } from "./utils";
+import { getPuter } from "./puter.client";
 
 export const getOrCreateHostingConfig = async (): Promise<HostingConfig | null> =>{
+    const puter = await getPuter();
     const existing = (await puter.kv.get(HOSTING_CONFIG_KEY)) as HostingConfig | null;
 
     if(existing?.subdomain) return { subdomain: existing.subdomain };
@@ -25,6 +26,7 @@ export const uploadImageToHosting = async ({ hosting, url, projectId, label }: S
     if(isHostedUrl(url)) return { url };
 
     try {
+        const puter = await getPuter();
         const resolved = label == "rendered" ? await imageUrlToPngBlob(url).then((blob) => blob ? { blob, contentType: 'image/png' }: null)
         :await fetchBlobFromUrl(url);
 

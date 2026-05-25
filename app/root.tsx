@@ -84,7 +84,7 @@ export default function App() {
   }
 
   const signOut = async () => {
-    puterSignOut();
+    await puterSignOut();
     return await refreshAuth();
   }
 

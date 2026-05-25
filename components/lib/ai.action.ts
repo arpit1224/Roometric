@@ -1,5 +1,5 @@
-import puter from "@heyputer/puter.js";
 import { ROOMETRIC_RENDER_PROMPT } from "./constants";
+import { getPuter } from "./puter.client";
 
 export const fetchAsDataUrl = async (url: string): Promise<string> => {
   const response = await fetch(url);
@@ -32,6 +32,7 @@ export const generate3DView = async ({
     throw new Error('Invalid source image payload');
   }
 
+  const puter = await getPuter();
   const response = await puter.ai.txt2img(ROOMETRIC_RENDER_PROMPT,{
     provider: 'gemini',
     model: 'gemini-2.5-flash-image-preview',
@@ -39,6 +40,7 @@ export const generate3DView = async ({
     input_image_mime_type: mimeType,
     ratio: { w: 1024, h: 1024 },
   });
+  
 
   const rawImageUrl = (response as HTMLImageElement).src ?? null;
 

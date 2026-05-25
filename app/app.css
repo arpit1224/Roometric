@@ -223,6 +223,10 @@
                 .help {
                     @apply text-zinc-500 text-xs;
                 }
+
+                .upload-error {
+                    @apply mt-2 text-red-600 text-xs font-medium text-center;
+                }
             }
 
             &:not(.is-dragging):hover .drop-icon {
