@@ -8,13 +8,14 @@ import {
 } from './lib/constants';
 
 type UploadProps = {
-    onComplete?: (base64Data: string) => void;
+    onComplete?: (base64Data: string) => Promise<boolean | void> | boolean | void;
 }
 
 const Upload = ({ onComplete }: UploadProps) => {
     const [file, setFile] = useState<File | null>(null);
     const [isDragging, setisDragging] = useState(false);
     const [progress, setprogress] = useState(0);
+    const [error, setError] = useState<string | null>(null);
     const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -34,6 +35,7 @@ const Upload = ({ onComplete }: UploadProps) => {
 
     const processFile = (selectedFile: File) => {
         if (!isSignedIn) return;
+        setError(null);
 
         if (progressIntervalRef.current) {
             clearInterval(progressIntervalRef.current);
@@ -63,8 +65,14 @@ const Upload = ({ onComplete }: UploadProps) => {
                     clearInterval(progressIntervalRef.current);
                     progressIntervalRef.current = null;
 
-                    redirectTimeoutRef.current = setTimeout(() => {
-                        onComplete?.(base64Data);
+                    redirectTimeoutRef.current = setTimeout(async () => {
+                        const completed = await onComplete?.(base64Data);
+
+                        if (completed === false) {
+                            setFile(null);
+                            setprogress(0);
+                            setError('Could not create project. Please try again.');
+                        }
                     }, REDIRECT_DELAY_MS);
                 }
             }, PROGRESS_INTERVAL_MS);
@@ -148,6 +156,7 @@ const Upload = ({ onComplete }: UploadProps) => {
                             ): ("Sign in or Sign up with Puter to upload")}
                         </p>
                         <p className="help">Maximum file size 50 MB.</p>
+                        {error && <p className="upload-error">{error}</p>}
                     </div>
                 </div>
             ) : (
